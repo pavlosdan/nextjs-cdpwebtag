@@ -1,0 +1,7 @@
+src
+!src/index.ts
+!src/CDPWebtag.tsx
+!src/types/a1Config.ts
+!src/utils/fetchKey.ts
+.gitignore
+tsconfig.json
