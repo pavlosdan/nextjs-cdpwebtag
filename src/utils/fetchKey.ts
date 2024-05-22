@@ -31,3 +31,17 @@ export const hashTokenWithDate = async (token: string, date: string): Promise<st
   }
   return hash;
 };
+
+export const saveTokenToLocalStorage = (token: string, date: string) => {
+  const tokenData = { token, date };
+  localStorage.setItem('a1_token_data', JSON.stringify(tokenData));
+};
+
+export const getTokenFromLocalStorage = () => {
+  const tokenData = localStorage.getItem('a1_token_data');
+  return tokenData ? JSON.parse(tokenData) : { token: null, date: null };
+};
+
+export const clearTokenFromLocalStorage = () => {
+  localStorage.removeItem('a1_token_data');
+};

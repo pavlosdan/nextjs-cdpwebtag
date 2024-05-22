@@ -1,6 +1,13 @@
 import { useEffect, useState } from 'react';
 import Script from 'next/script';
-import { fetchAccessToken, getCurrentDate, hashTokenWithDate } from './utils/fetchKey';
+import {
+  fetchAccessToken,
+  getCurrentDate,
+  hashTokenWithDate,
+  saveTokenToLocalStorage,
+  getTokenFromLocalStorage,
+  clearTokenFromLocalStorage,
+} from './utils/fetchKey';
 import { A1Config } from './types/a1Config';
 
 const CDPWebtag = () => {
@@ -9,8 +16,16 @@ const CDPWebtag = () => {
   useEffect(() => {
     const setupConfig = async () => {
       try {
-        const accessToken = await fetchAccessToken();
         const currentDate = getCurrentDate();
+        const { token: storedToken, date: storedDate } = getTokenFromLocalStorage();
+
+        let accessToken = storedToken;
+        if (!storedToken || storedDate !== currentDate) {
+          // If no token is stored or the stored date is different from the current date, fetch a new token
+          accessToken = await fetchAccessToken();
+          saveTokenToLocalStorage(accessToken, currentDate);
+        }
+
         const hashedKey = await hashTokenWithDate(accessToken, currentDate);
 
         const newConfig: A1Config = {
@@ -26,15 +41,11 @@ const CDPWebtag = () => {
         }
       } catch (error) {
         console.error('Error setting up $A1Config:', error);
+        clearTokenFromLocalStorage(); // Clear invalid token from local storage
       }
     };
 
     setupConfig();
-
-    // Refresh the key every 24 hours
-    const interval = setInterval(setupConfig, 24 * 60 * 60 * 1000);
-
-    return () => clearInterval(interval);
   }, []);
 
   return (
